@@ -116,6 +116,12 @@ class AppHelper:
         if output_path.is_dir():
             filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
             output_path = output_path.joinpath(filename)
+        if output_path.exists():
+            index = 1
+            origin = output_path.stem
+            while output_path.exists():
+                output_path = output_path.with_name(f'{origin}_{index}{output_path.suffix}')
+                index += 1
         output_path.parent.mkdir(parents=True, exist_ok=True)
         writer = pd.ExcelWriter(output_path)
         for key, value in self.result.items():
