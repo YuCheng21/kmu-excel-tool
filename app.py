@@ -1,5 +1,6 @@
 import sys
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtGui import QIcon, QTextCursor
@@ -56,8 +57,12 @@ class Home:
         self.window.btn_convert.clicked.connect(self.convert)
 
     def initialize(self):
-        self.window.edit_input.setText(str(Path('./input/2.xls').absolute()))
-        self.window.edit_output.setText(str(Path('./output/result.xlsx').absolute()))
+        input_str = Path('./input/testing2.xls')
+        # if input_str.exists():
+        #     self.window.edit_input.setText(str(input_str.absolute()))
+        self.window.edit_input.setText(str(input_str.absolute()))
+        output_str = Path(f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")
+        self.window.edit_output.setText(str(output_str.absolute()))
 
     def open_file(self):
         filename, filetype = QFileDialog.getOpenFileName(
@@ -85,12 +90,13 @@ class Home:
         app_helper = AppHelper()
         logging.info('開始轉換')
         try:
-            app_helper.auto_run(input_file, output_file)
+            output_path = app_helper.auto_run(input_file, output_file)
         except Exception as e:
             logging.error(e)
             QMessageBox.critical(self.window, '錯誤', '轉換失敗', QMessageBox.Ok)
         else:
             logging.info('轉換完成')
+            logging.info(f'輸出路徑: {output_path}')
             QMessageBox.information(self.window, '完成', '轉換完成', QMessageBox.Ok)
 
     def test(self):

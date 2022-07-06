@@ -7,7 +7,11 @@ import codebook
 def read_file(input_file):
     input_path = Path(input_file)
     if not input_path.exists():
-        raise Exception('00', 'input path not exists')
+        raise Exception('00', 'input path is not exists')
+    if not input_path.is_file():
+        raise Exception('01', 'input path is not a file')
+    if not input_path.suffix == '.xls':
+        raise Exception('02', 'input path extention not allow')
     return pd.read_excel(input_path, sheet_name=None)
 
 
@@ -119,6 +123,7 @@ class AppHelper:
                 value.iloc[:, i] = pd.to_numeric(value.iloc[:, i])
             value.to_excel(writer, key, index=False)
         writer.save()
+        return output_path
 
     def auto_run(self, input_file, output_file):
         self.input_excel = read_file(input_file)
@@ -128,9 +133,10 @@ class AppHelper:
             difficulty, severity = self.flatten()
             self.result[f'{self.case_name}-{self.case_id}-困擾度'] = difficulty
             self.result[f'{self.case_name}-{self.case_id}-嚴重度'] = severity
-        self.export(output_file)
+        output_path = self.export(output_file)
+        return output_path
 
 
 if __name__ == '__main__':
     app_helper = AppHelper()
-    app_helper.auto_run('./input/2.xls', './output/result.xlsx')
+    app_helper.auto_run('./input/testing2.xls', f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")

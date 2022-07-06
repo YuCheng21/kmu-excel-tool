@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>380</height>
+    <width>795</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,11 +87,17 @@
           <property name="font">
            <font>
             <family>思源黑體</family>
-            <pointsize>12</pointsize>
+            <pointsize>10</pointsize>
            </font>
           </property>
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
           </property>
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -106,6 +112,9 @@
            <set>QTextEdit::AutoNone</set>
           </property>
           <property name="tabChangesFocus">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
            <bool>true</bool>
           </property>
           <property name="placeholderText">
@@ -147,11 +156,14 @@
           <property name="font">
            <font>
             <family>思源黑體</family>
-            <pointsize>12</pointsize>
+            <pointsize>10</pointsize>
            </font>
           </property>
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
           <property name="placeholderText">
            <string>請選擇輸出路徑</string>
@@ -212,7 +224,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
+     <width>795</width>
      <height>22</height>
     </rect>
    </property>
