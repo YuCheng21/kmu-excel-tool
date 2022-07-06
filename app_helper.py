@@ -1,22 +1,33 @@
+from datetime import datetime
 from pathlib import Path
 import pandas as pd
 import codebook
 
-input_path = './input/1.xls'
-output_path = './output/result.xlsx'
 
-if __name__ == '__main__':
-    file_path = Path(input_path)
-    excel = pd.read_excel(file_path, sheet_name=None)
-    result = {}
-    for key, value in excel.items():
+def read_file(input_file):
+    input_path = Path(input_file)
+    if not input_path.exists():
+        raise Exception('00', 'input path not exists')
+    return pd.read_excel(input_path, sheet_name=None)
+
+
+class AppHelper:
+    def __init__(self) -> None:
+        super().__init__()
+        self.case_name = None
+        self.case_id = None
+        self.result = None
+        self.df_normalization = None
+        self.input_excel = None
+
+    def normalize(self, key, value):
         sheet_name = key.split('_')
         sheet_content = pd.DataFrame(value)
 
-        case_id = sheet_name[1]
-        case_name = sheet_name[2]
+        self.case_id = sheet_name[1]
+        self.case_name = sheet_name[2]
 
-        normalization = []
+        normal = []
         drug = None
         drug_type = None
         start_date = None
@@ -28,22 +39,26 @@ if __name__ == '__main__':
                 start_date = row.loc['新增日期']
                 flag = True
             elif pd.isna(row.loc['施打藥物']) and pd.isna(row.loc['藥物種類']) and not pd.isna(row.loc['副作用']):
-                normalization.append([drug_type, drug, row.loc['副作用'], row.loc['新增日期'], start_date])
+                normal.append([drug_type, drug, row.loc['副作用'], row.loc['新增日期'], start_date])
                 flag = False
         if flag is True:
-            normalization.append([drug_type, drug, None, None, start_date])
-        df_norm = pd.DataFrame(normalization)
+            normal.append([drug_type, drug, None, None, start_date])
+        return pd.DataFrame(normal)
 
+    def flatten(self):
         result_difficulty = []
         result_severity = []
-        for index, date in enumerate(df_norm.loc[:, 3].unique()):
+        for index, date in enumerate(self.df_normalization.loc[:, 3].unique()):
             CT_DRUG = {v: None for k, v in codebook.CT_DRUG.items()}
             TT_DRUG = {v: None for k, v in codebook.TT_DRUG.items()}
             HT_DRUG = {v: None for k, v in codebook.HT_DRUG.items()}
             effect_difficulty = {v: None for k, v in codebook.effect.items()}
             effect_severity = {v: None for k, v in codebook.effect.items()}
-            mask = df_norm[df_norm.loc[:, 3] == date]
-            if date is None: mask = df_norm[df_norm.loc[:, 3].isnull()]
+
+            mask = self.df_normalization[self.df_normalization.loc[:, 3] == date]
+            if date is None:
+                mask = self.df_normalization[self.df_normalization.loc[:, 3].isnull()]
+
             start_date = None
             for _, row in mask.iterrows():
                 start_date = row.loc[4]
@@ -72,10 +87,9 @@ if __name__ == '__main__':
             CT_DRUG_str = ''.join(list(filter(None, CT_DRUG.values())))
             TT_DRUG_str = ''.join(list(filter(None, TT_DRUG.values())))
             HT_DRUG_str = ''.join(list(filter(None, HT_DRUG.values())))
-            info = [case_id, start_date, date, CT_DRUG_str, TT_DRUG_str, HT_DRUG_str, ]
+            info = [self.case_id, start_date, date, CT_DRUG_str, TT_DRUG_str, HT_DRUG_str, ]
             result_difficulty.append(info + list({k: v or '0' for (k, v) in effect_difficulty.items()}.values()))
             result_severity.append(info + list({k: v or '0' for (k, v) in effect_severity.items()}.values()))
-
         label_base = ['ID', 'CTSDAY', 'DATE', 'CT_DRUG', 'TT_DRUG', 'HT_DRUG']
         label_1 = [
             'DS1(皮疹)', 'DS2(掉髮)', 'DS3(熱潮紅)', 'DS4(噁心嘔吐)', 'DS5(皮膚反應)', 'DS6(白血球下降)',
@@ -91,11 +105,32 @@ if __name__ == '__main__':
         df_result_difficulty.columns = label_base + label_1
         df_result_severity = pd.DataFrame(result_severity)
         df_result_severity.columns = label_base + label_2
-        result[f'{case_name}-{case_id}-困擾度'] = df_result_difficulty
-        result[f'{case_name}-{case_id}-嚴重度'] = df_result_severity
-    writer = pd.ExcelWriter(Path(output_path))
-    for key, value in result.items():
-        for i in range(3, 22):
-            value.iloc[:, i] = pd.to_numeric(value.iloc[:, i])
-        value.to_excel(writer, key, index=False)
-    writer.save()
+        return df_result_difficulty, df_result_severity
+
+    def export(self, output_file):
+        output_path = Path(output_file)
+        if output_path.is_dir():
+            filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx"
+            output_path = output_path.joinpath(filename)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        writer = pd.ExcelWriter(output_path)
+        for key, value in self.result.items():
+            for i in range(3, 22):
+                value.iloc[:, i] = pd.to_numeric(value.iloc[:, i])
+            value.to_excel(writer, key, index=False)
+        writer.save()
+
+    def auto_run(self, input_file, output_file):
+        self.input_excel = read_file(input_file)
+        self.result = {}
+        for key, value in self.input_excel.items():
+            self.df_normalization = self.normalize(key, value)
+            difficulty, severity = self.flatten()
+            self.result[f'{self.case_name}-{self.case_id}-困擾度'] = difficulty
+            self.result[f'{self.case_name}-{self.case_id}-嚴重度'] = severity
+        self.export(output_file)
+
+
+if __name__ == '__main__':
+    app_helper = AppHelper()
+    app_helper.auto_run('./input/1.xls', './output/result.xlsx')
