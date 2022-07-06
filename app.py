@@ -8,6 +8,8 @@ from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTextEdit, QPushButton
 from PySide6.QtCore import QFile, QIODevice
 
+import qdarkstyle
+
 from helper import Helper
 
 logging.basicConfig(
@@ -114,6 +116,10 @@ class Home:
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon('./static/logo.png'))
+
+    # setup stylesheet
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyside6', palette=qdarkstyle.DarkPalette))
+
     home = Home()
     home.connect()
     home.initialize()
