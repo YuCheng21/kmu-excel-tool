@@ -4,8 +4,9 @@ from cx_Freeze import setup, Executable
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
     'include_files': [
-        'ui/',
-        'input/',
+        './app.ui',
+        './static/',
+        './input/',
     ],
     "excludes": [],
 }
@@ -16,9 +17,9 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 target = Executable(
-    script='app.py',
+    script='./app.py',
     base=base,
-    icon='ui/favicon.ico'
+    icon='./static/favicon.ico'
 )
 
 setup(

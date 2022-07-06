@@ -15,7 +15,7 @@ def read_file(input_file):
     return pd.read_excel(input_path, sheet_name=None)
 
 
-class AppHelper:
+class Helper:
     def __init__(self) -> None:
         super().__init__()
         self.case_name = None
@@ -144,5 +144,5 @@ class AppHelper:
 
 
 if __name__ == '__main__':
-    app_helper = AppHelper()
-    app_helper.auto_run('./input/testing2.xls', f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")
+    helper = Helper()
+    helper.auto_run('./input/testing2.xls', f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")

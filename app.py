@@ -5,10 +5,10 @@ from pathlib import Path
 
 from PySide6.QtGui import QIcon, QTextCursor
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTextEdit, QPushButton
 from PySide6.QtCore import QFile, QIODevice
 
-from app_helper import AppHelper
+from helper import Helper
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 
 
-class GuiLogger(logging.Handler):
+class LoggerHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         self.edit.textCursor().insertText(self.format(record) + '\n')
         self.edit.moveCursor(QTextCursor.End)
@@ -28,7 +28,7 @@ class Home:
     def __init__(self) -> None:
         super().__init__()
 
-        ui_file_name = "./ui/app.ui"
+        ui_file_name = "app.ui"
         ui_file = QFile(ui_file_name)
         if not ui_file.open(QIODevice.ReadOnly):
             print(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
@@ -41,28 +41,39 @@ class Home:
             print(loader.errorString())
             sys.exit(-1)
 
+        self.btn_input = self.window.findChild(QPushButton, 'btn_input')
+        self.btn_output = self.window.findChild(QPushButton, 'btn_output')
+        self.btn_convert = self.window.findChild(QPushButton, 'btn_convert')
+
+        self.edit_input = self.window.findChild(QTextEdit, 'edit_input')
+        self.edit_output = self.window.findChild(QTextEdit, 'edit_output')
+        self.edit_logging = self.window.findChild(QTextEdit, 'edit_logging')
+
     def gui_logger(self):
-        handler = GuiLogger()
+        handler = LoggerHandler()
         formatter = logging.Formatter(
             fmt='%(asctime)s %(levelname)s: %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
         handler.setFormatter(formatter)
-        handler.edit = self.window.edit_logging
+        handler.edit = self.edit_logging
         logging.getLogger().addHandler(handler)
 
     def connect(self):
-        self.window.btn_input.clicked.connect(self.open_file)
-        self.window.btn_output.clicked.connect(self.save_folder)
-        self.window.btn_convert.clicked.connect(self.convert)
+        # self.window.btn_input.clicked.connect(self.open_file)
+        # self.window.btn_output.clicked.connect(self.save_folder)
+        # self.window.btn_convert.clicked.connect(self.convert)
+        self.btn_input.clicked.connect(self.open_file)
+        self.btn_output.clicked.connect(self.save_folder)
+        self.btn_convert.clicked.connect(self.convert)
 
     def initialize(self):
         input_str = Path('./input/testing2.xls')
         # if input_str.exists():
-        #     self.window.edit_input.setText(str(input_str.absolute()))
-        self.window.edit_input.setText(str(input_str.absolute()))
+        #     self.window.edit_input.setPlainText(str(input_str.absolute()))
+        self.edit_input.setPlainText(str(input_str.absolute()))
         output_str = Path(f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")
-        self.window.edit_output.setText(str(output_str.absolute()))
+        self.edit_output.setPlainText(str(output_str.absolute()))
 
     def open_file(self):
         filename, filetype = QFileDialog.getOpenFileName(
@@ -71,7 +82,7 @@ class Home:
             "./input",
             "XML Spreadsheet file (*.xls)"
         )
-        self.window.edit_input.setText(str(Path(filename).absolute()))
+        self.edit_input.setPlainText(str(Path(filename).absolute()))
 
     def save_folder(self):
         # folder_path = QFileDialog.getExistingDirectory(self.window, "輸出檔案資料夾", "./")
@@ -81,16 +92,16 @@ class Home:
             './output/result.xlsx',
             "XML Spreadsheet file (*.xlsx)"
         )
-        self.window.edit_output.setText(str(Path(filename).absolute()))
+        self.edit_output.setPlainText(str(Path(filename).absolute()))
 
     def convert(self):
-        input_file = self.window.edit_input.toPlainText()
-        output_file = self.window.edit_output.toPlainText()
+        input_file = self.edit_input.toPlainText()
+        output_file = self.edit_output.toPlainText()
 
-        app_helper = AppHelper()
+        helper = Helper()
         logging.info('開始轉換')
         try:
-            output_path = app_helper.auto_run(input_file, output_file)
+            output_path = helper.auto_run(input_file, output_file)
         except Exception as e:
             logging.error(e)
             QMessageBox.critical(self.window, '錯誤', '轉換失敗', QMessageBox.Ok)
@@ -99,13 +110,10 @@ class Home:
             logging.info(f'輸出路徑: {output_path}')
             QMessageBox.information(self.window, '完成', '轉換完成', QMessageBox.Ok)
 
-    def test(self):
-        self.window.edit_logging.setText('ok')
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon('./ui/logo.png'))
+    app.setWindowIcon(QIcon('./static/logo.png'))
     home = Home()
     home.connect()
     home.initialize()
