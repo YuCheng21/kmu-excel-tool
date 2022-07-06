@@ -84,9 +84,9 @@ class AppHelper:
                             continue
                         effect_difficulty[key] = difficulty
                         effect_severity[key] = severity
-            CT_DRUG_str = ''.join(list(filter(None, CT_DRUG.values())))
-            TT_DRUG_str = ''.join(list(filter(None, TT_DRUG.values())))
-            HT_DRUG_str = ''.join(list(filter(None, HT_DRUG.values())))
+            CT_DRUG_str = ','.join(list(filter(None, CT_DRUG.values())))
+            TT_DRUG_str = ','.join(list(filter(None, TT_DRUG.values())))
+            HT_DRUG_str = ','.join(list(filter(None, HT_DRUG.values())))
             info = [self.case_id, start_date, date, CT_DRUG_str, TT_DRUG_str, HT_DRUG_str, ]
             result_difficulty.append(info + list({k: v or '0' for (k, v) in effect_difficulty.items()}.values()))
             result_severity.append(info + list({k: v or '0' for (k, v) in effect_severity.items()}.values()))
@@ -115,7 +115,7 @@ class AppHelper:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         writer = pd.ExcelWriter(output_path)
         for key, value in self.result.items():
-            for i in range(3, 22):
+            for i in range(6, 22):
                 value.iloc[:, i] = pd.to_numeric(value.iloc[:, i])
             value.to_excel(writer, key, index=False)
         writer.save()
@@ -133,4 +133,4 @@ class AppHelper:
 
 if __name__ == '__main__':
     app_helper = AppHelper()
-    app_helper.auto_run('./input/1.xls', './output/result.xlsx')
+    app_helper.auto_run('./input/2.xls', './output/result.xlsx')
