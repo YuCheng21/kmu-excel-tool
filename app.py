@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 import sys
 import webbrowser
 from datetime import datetime
@@ -12,15 +13,36 @@ import qdarkstyle
 
 from helper import Helper
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    stream=sys.stderr,
-    level=logging.INFO,
-)
+logger = logging.getLogger(__name__)
+# the logger with handler will use higher one level (!important)
+logger.setLevel(logging.DEBUG)
 
 
-class LoggerHandler(logging.Handler):
+def console_logger():
+    console_handler = logging.StreamHandler(sys.stderr)
+    console_format = logging.Formatter(
+        fmt='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    console_handler.setFormatter(console_format)
+    console_handler.setLevel(logging.DEBUG)
+    logger.addHandler(console_handler)
+
+
+def file_logger():
+    log_path = Path('./logs/app.log')
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    file_handler = RotatingFileHandler(log_path, maxBytes=1 * 10 ** 6, backupCount=10, encoding='UTF-8', delay=False)
+    file_format = logging.Formatter(
+        fmt='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    file_handler.setFormatter(file_format)
+    file_handler.setLevel(logging.DEBUG)
+    logger.addHandler(file_handler)
+
+
+class GuiHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         self.edit.textCursor().insertText(self.format(record) + '\n')
         self.edit.moveCursor(QTextCursor.End)
@@ -33,14 +55,14 @@ class Home:
         ui_file_name = "app.ui"
         ui_file = QFile(ui_file_name)
         if not ui_file.open(QIODevice.ReadOnly):
-            print(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
+            logger.error(f'Cannot open {ui_file_name}: {ui_file.errorString()}')
             sys.exit(-1)
 
         loader = QUiLoader()
         self.window = loader.load(ui_file)
         ui_file.close()
         if not self.window:
-            print(loader.errorString())
+            logger.error(loader.errorString())
             sys.exit(-1)
 
         self.btn_input = self.window.findChild(QPushButton, 'btn_input')
@@ -53,14 +75,15 @@ class Home:
         self.edit_logging = self.window.findChild(QTextEdit, 'edit_logging')
 
     def gui_logger(self):
-        handler = LoggerHandler()
+        gui_handler = GuiHandler()
         formatter = logging.Formatter(
             fmt='%(asctime)s %(levelname)s: %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
-        handler.setFormatter(formatter)
-        handler.edit = self.edit_logging
-        logging.getLogger().addHandler(handler)
+        gui_handler.setLevel(logging.INFO)
+        gui_handler.setFormatter(formatter)
+        gui_handler.edit = self.edit_logging
+        logger.addHandler(gui_handler)
 
     def connect(self):
         # self.window.btn_input.clicked.connect(self.open_file)
@@ -115,19 +138,22 @@ class Home:
         output_file = self.edit_output.toPlainText()
 
         helper = Helper()
-        logging.info('開始轉換')
+        logger.info('開始轉換')
         try:
             output_path = helper.auto_run(input_file, output_file)
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
             QMessageBox.critical(self.window, '錯誤', '轉換失敗', QMessageBox.Ok)
         else:
-            logging.info('轉換完成')
-            logging.info(f'輸出路徑: {output_path}')
+            logger.info('轉換完成')
+            logger.info(f'輸出路徑: {output_path}')
             QMessageBox.information(self.window, '完成', '轉換完成', QMessageBox.Ok)
 
 
 if __name__ == '__main__':
+    console_logger()
+    file_logger()
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon('./static/logo.png'))
 
