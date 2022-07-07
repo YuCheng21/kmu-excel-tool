@@ -66,14 +66,15 @@ class Helper:
             start_date = None
             for _, row in mask.iterrows():
                 start_date = row.loc[4]
-                buffer_drug = row.loc[1].split('、')
-                for _, item in enumerate(buffer_drug):
-                    if item in codebook.CT_DRUG.values():
-                        CT_DRUG[item] = {v: k for k, v in codebook.CT_DRUG.items()}[item]
-                    if item in codebook.TT_DRUG.values():
-                        TT_DRUG[item] = {v: k for k, v in codebook.TT_DRUG.items()}[item]
-                    if item in codebook.HT_DRUG.values():
-                        HT_DRUG[item] = {v: k for k, v in codebook.HT_DRUG.items()}[item]
+                if row.loc[1] is not None:
+                    buffer_drug = row.loc[1].split('、')
+                    for _, item in enumerate(buffer_drug):
+                        if item in codebook.CT_DRUG.values():
+                            CT_DRUG[item] = {v: k for k, v in codebook.CT_DRUG.items()}[item]
+                        if item in codebook.TT_DRUG.values():
+                            TT_DRUG[item] = {v: k for k, v in codebook.TT_DRUG.items()}[item]
+                        if item in codebook.HT_DRUG.values():
+                            HT_DRUG[item] = {v: k for k, v in codebook.HT_DRUG.items()}[item]
 
                 if type(row.loc[2]) is str:
                     buffer_effect = row.loc[2].split('、')
@@ -145,4 +146,4 @@ class Helper:
 
 if __name__ == '__main__':
     helper = Helper()
-    helper.auto_run('./input/testing2.xls', f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")
+    helper.auto_run("D:\Downloads\藥物及副作用數據_1657166339.xls", f"./output/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.xlsx")
