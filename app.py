@@ -1,13 +1,13 @@
-import sys
 import logging
+import sys
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 
+from PySide6.QtCore import QFile, QIODevice
 from PySide6.QtGui import QIcon, QTextCursor
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QTextEdit, QPushButton
-from PySide6.QtCore import QFile, QIODevice
-
 import qdarkstyle
 
 from helper import Helper
@@ -46,6 +46,7 @@ class Home:
         self.btn_input = self.window.findChild(QPushButton, 'btn_input')
         self.btn_output = self.window.findChild(QPushButton, 'btn_output')
         self.btn_convert = self.window.findChild(QPushButton, 'btn_convert')
+        self.btn_open_dir = self.window.findChild(QPushButton, 'btn_open_dir')
 
         self.edit_input = self.window.findChild(QTextEdit, 'edit_input')
         self.edit_output = self.window.findChild(QTextEdit, 'edit_output')
@@ -68,6 +69,7 @@ class Home:
         self.btn_input.clicked.connect(self.open_file)
         self.btn_output.clicked.connect(self.save_folder)
         self.btn_convert.clicked.connect(self.convert)
+        self.btn_open_dir.clicked.connect(self.open_dir)
 
     def initialize(self):
         input_str = Path('./input/testing2.xls')
@@ -96,6 +98,18 @@ class Home:
         )
         self.edit_output.setPlainText(str(Path(filename).absolute()))
 
+    def open_dir(self):
+        output_file = self.edit_output.toPlainText()
+        output_path = Path(output_file)
+        while not output_path.exists():
+            output_path = output_path.parent
+        if output_path.is_file():
+            output_path = output_path.parent
+        if output_path.is_dir():
+            webbrowser.open(output_path)
+            return
+        raise Exception('03', 'open directory error')
+
     def convert(self):
         input_file = self.edit_input.toPlainText()
         output_file = self.edit_output.toPlainText()
@@ -118,7 +132,7 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon('./static/logo.png'))
 
     # setup stylesheet
-    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyside6', palette=qdarkstyle.DarkPalette))
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyside6', palette=qdarkstyle.LightPalette))
 
     home = Home()
     home.connect()

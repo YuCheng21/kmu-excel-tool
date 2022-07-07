@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>790</width>
-    <height>490</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,7 +107,7 @@
             </font>
            </property>
            <property name="text">
-            <string>選擇檔案</string>
+            <string>1.選擇檔案</string>
            </property>
           </widget>
          </item>
@@ -159,7 +159,10 @@
             <set>QTextEdit::AutoNone</set>
            </property>
            <property name="tabChangesFocus">
-            <bool>true</bool>
+            <bool>false</bool>
+           </property>
+           <property name="lineWrapMode">
+            <enum>QTextEdit::NoWrap</enum>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -188,7 +191,7 @@
             </font>
            </property>
            <property name="text">
-            <string>輸出路徑</string>
+            <string>2.輸出路徑</string>
            </property>
           </widget>
          </item>
@@ -208,6 +211,12 @@
            </property>
            <property name="verticalScrollBarPolicy">
             <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="lineWrapMode">
+            <enum>QTextEdit::NoWrap</enum>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -241,17 +250,34 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QPushButton" name="btn_convert">
-         <property name="font">
-          <font>
-           <family>jf open 粉圓 1.1</family>
-           <pointsize>18</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>開始轉換</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="btn_convert">
+           <property name="font">
+            <font>
+             <family>jf open 粉圓 1.1</family>
+             <pointsize>18</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>3.開始轉換</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_open_dir">
+           <property name="font">
+            <font>
+             <family>jf open 粉圓 1.1</family>
+             <pointsize>18</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>4.開啟輸出資料夾</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
