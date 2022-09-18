@@ -8,6 +8,8 @@
 
 ## Environment
 
+- python 3.9 or later
+
 ```bash
 pip install -r requirements.txt
 ```
